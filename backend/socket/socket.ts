@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { Server as SocketIOServer, Socket } from "socket.io";
+import { registerUserEvents } from "./userEvents";
 
 dotenv.config();
 
@@ -36,16 +37,17 @@ export function initializeSocket(server: any) {
   });
 
   // when socket connects, register events
-  io.on("connection", (socket: Socket) => {
+  io.on("connection", async (socket: Socket) => {
+    const userId = socket?.data?.userId;
     console.log(
-      `User connected: ${socket.id}, UserID: ${socket.data.userId}, userName: ${socket.data.username}`
+      `User connected: ${socket.id}, UserID: ${userId}, userName: ${socket.data.name}`
     );
 
     // register events
+    registerUserEvents(io, socket);
 
     socket.on("disconnect", () => {
-      console.log;
-      `User disconnected: ${socket.data?.userId}`;
+      console.log(`User disconnected: ${userId}`);
     });
   });
 
