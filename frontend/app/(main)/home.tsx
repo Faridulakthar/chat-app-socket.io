@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React, { useEffect } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
@@ -7,6 +7,7 @@ import { useAuth } from "@/context/authContext";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { testSocket } from "@/socket/socketEvents";
 import { verticalScale } from "@/utils/styling";
+import * as Icons from "phosphor-react-native";
 
 const Home = () => {
   const { user: currentUser, signOut } = useAuth();
@@ -37,11 +38,21 @@ const Home = () => {
               Welcome back,{" "}
               <Typo size={20} color={colors.white} fontWeight={"800"}>
                 {currentUser?.name || "User"}
-              </Typo>{" "}
-              
-              {" 👋"} 
+              </Typo>
             </Typo>
           </View>
+
+          <TouchableOpacity style={styles.settingIcon} onPress={signOut}>
+            <Icons.GearSixIcon
+              color={colors.white}
+              weight="fill"
+              size={verticalScale(22)}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.content}>
+           
         </View>
       </View>
     </ScreenWrapper>
