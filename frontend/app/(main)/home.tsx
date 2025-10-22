@@ -38,6 +38,7 @@ const Home = () => {
               <Typo size={20} color={colors.white} fontWeight={"800"}>
                 {currentUser?.name || "User"}
               </Typo>{" "}
+              
               {" 👋"} 
             </Typo>
           </View>
