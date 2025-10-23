@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { useEffect } from "react";
+import React, { use, useEffect } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import Button from "@/components/Button";
@@ -8,8 +8,10 @@ import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { testSocket } from "@/socket/socketEvents";
 import { verticalScale } from "@/utils/styling";
 import * as Icons from "phosphor-react-native";
+import { useRouter } from "expo-router";
 
 const Home = () => {
+  const router = useRouter();
   const { user: currentUser, signOut } = useAuth();
 
   useEffect(() => {
@@ -42,7 +44,10 @@ const Home = () => {
             </Typo>
           </View>
 
-          <TouchableOpacity style={styles.settingIcon} onPress={signOut}>
+          <TouchableOpacity
+            style={styles.settingIcon}
+            onPress={() => router.push("/(main)/profileModal")}
+          >
             <Icons.GearSixIcon
               color={colors.white}
               weight="fill"
@@ -51,9 +56,7 @@ const Home = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.content}>
-           
-        </View>
+        <View style={styles.content}></View>
       </View>
     </ScreenWrapper>
   );
