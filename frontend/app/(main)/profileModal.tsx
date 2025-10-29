@@ -20,10 +20,11 @@ import { useAuth } from "@/context/authContext";
 import { UserProps } from "@/types";
 import Button from "@/components/Button";
 import { useRouter } from "expo-router";
+import { updateProfile } from "@/socket/socketEvents";
 
 const ProfileModal = () => {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, updateToken } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState<UserProps>({
@@ -31,6 +32,25 @@ const ProfileModal = () => {
     name: "",
     avatar: null,
   });
+
+  useEffect(() => {
+    updateProfile(processUpdateProfile);
+
+    return () => {
+      updateProfile(processUpdateProfile, true);
+    };
+  }, []);
+
+  const processUpdateProfile = (res: any) => {
+    setLoading(false);
+
+    if (res.success) {
+      updateToken(res?.data?.token);
+      router.back();
+    } else {
+      Alert.alert("Update Profile", res.message || "Failed to update profile");
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -42,7 +62,22 @@ const ProfileModal = () => {
     }
   }, [user]);
 
-  const onSubmit = () => {};
+  const onSubmit = () => {
+    const { name, avatar } = userData;
+
+    if (!name) {
+      Alert.alert("User", "Please enter your name");
+      return;
+    }
+
+    let data = {
+      name,
+      avatar,
+    };
+
+    setLoading(true);
+    updateProfile(data);
+  };
 
   const showLogoutAlert = () => {
     Alert.alert("Confirm", "Are you sure you want to log out?", [
