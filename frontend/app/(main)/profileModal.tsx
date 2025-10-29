@@ -1,3 +1,19 @@
+import Avatar from "@/components/Avatar";
+import BackButton from "@/components/BackButton";
+import Button from "@/components/Button";
+import Header from "@/components/Header";
+import Input from "@/components/Input";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import { colors, spacingX, spacingY } from "@/constants/theme";
+import { useAuth } from "@/context/authContext";
+import { updateProfile } from "@/socket/socketEvents";
+import { UserDataProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import * as Icons from "phosphor-react-native";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Platform,
@@ -6,66 +22,82 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { colors, spacingX, spacingY } from "@/constants/theme";
-import { scale, verticalScale } from "@/utils/styling";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Header from "@/components/Header";
-import BackButton from "@/components/BackButton";
-import Avatar from "@/components/Avatar";
-import * as Icons from "phosphor-react-native";
-import Typo from "@/components/Typo";
-import Input from "@/components/Input";
-import { useAuth } from "@/context/authContext";
-import { UserProps } from "@/types";
-import Button from "@/components/Button";
-import { useRouter } from "expo-router";
-import { updateProfile } from "@/socket/socketEvents";
 
 const ProfileModal = () => {
-  const router = useRouter();
   const { user, signOut, updateToken } = useAuth();
-
   const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState<UserProps>({
-    email: "",
+  const router = useRouter();
+
+  const [userData, setUserData] = useState<UserDataProps>({
     name: "",
+    email: "",
     avatar: null,
   });
 
   useEffect(() => {
     updateProfile(processUpdateProfile);
-
     return () => {
       updateProfile(processUpdateProfile, true);
     };
   }, []);
 
   const processUpdateProfile = (res: any) => {
+    console.log("got res: ", res);
     setLoading(false);
 
     if (res.success) {
-      updateToken(res?.data?.token);
+      updateToken(res.data.token);
       router.back();
     } else {
-      Alert.alert("Update Profile", res.message || "Failed to update profile");
+      Alert.alert("User", res.msg);
     }
   };
 
   useEffect(() => {
-    if (user) {
-      setUserData({
-        email: user.email,
-        name: user.name,
-        avatar: user.avatar,
-      });
-    }
+    setUserData({
+      name: user?.name || "",
+      email: user?.email || "",
+      avatar: user?.avatar,
+    });
   }, [user]);
 
-  const onSubmit = () => {
-    const { name, avatar } = userData;
+  const onPickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      //   allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+    });
 
-    if (!name) {
+    console.log(result);
+
+    if (!result.canceled) {
+      setUserData({ ...userData, avatar: result.assets[0] });
+    }
+  };
+
+  const handleLogout = async () => {
+    router.back();
+    await signOut();
+  };
+
+  const showLogoutAlert = () => {
+    Alert.alert("confirm", "Are you sure you want to logout?", [
+      {
+        text: "Cansel",
+        onPress: () => console.log("cansel logout"),
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        onPress: () => handleLogout(),
+        style: "destructive",
+      },
+    ]);
+  };
+  const onSubmit = async () => {
+    let { name, avatar } = userData;
+    if (!name.trim()) {
       Alert.alert("User", "Please enter your name");
       return;
     }
@@ -75,44 +107,40 @@ const ProfileModal = () => {
       avatar,
     };
 
-    setLoading(true);
-    updateProfile(data);
-  };
+    // if (avatar && avatar?.uri) {
+    //   setLoading(true);
+    //   const res = await uploadFileToCloudinary(avatar, "profiles");
+    //   console.log("result: ", res);
+    //   if (res.success) {
+    //     data.avatar = res.data;
+    //   } else {
+    //     Alert.alert("User", res.msg);
+    //     setLoading(false);
+    //     return;
+    //   }
+    // }
 
-  const showLogoutAlert = () => {
-    Alert.alert("Confirm", "Are you sure you want to log out?", [
-      {
-        text: "Cancel",
-        onPress: () => {},
-      },
-      {
-        text: "Log Out",
-        onPress: async () => {
-          router.back();
-          await signOut();
-        },
-        style: "destructive",
-      },
-    ]);
+    // setLoading(true);
+    updateProfile(data);
   };
 
   return (
     <ScreenWrapper isModal={true}>
       <View style={styles.container}>
         <Header
-          title="Update Profile"
+          title={"Update Profile"}
           leftIcon={
-            Platform.OS === "android" && <BackButton color={colors.black} />
+            Platform.OS == "android" && <BackButton color={colors.black} />
           }
           style={{ marginVertical: spacingY._15 }}
         />
 
-        {/* Form */}
+        {/* form */}
 
         <ScrollView contentContainerStyle={styles.from}>
           <View style={styles.avatarContainer}>
-            <Avatar uri={null} size={170} />
-            <TouchableOpacity style={styles.editIcon}>
+            <Avatar uri={userData.avatar} size={170} />
+            <TouchableOpacity style={styles.editIcon} onPress={onPickImage}>
               <Icons.PencilIcon
                 size={verticalScale(20)}
                 color={colors.neutral800}
@@ -123,33 +151,35 @@ const ProfileModal = () => {
           <View style={{ gap: spacingY._20 }}>
             <View style={styles.inputContainer}>
               <Typo style={{ paddingLeft: spacingX._10 }}>Email</Typo>
-
               <Input
-                value={userData?.email || ""}
+                value={userData.email}
                 containerStyle={{
                   borderColor: colors.neutral350,
                   paddingLeft: spacingX._20,
                   backgroundColor: colors.neutral300,
                 }}
-                editable={false}
                 onChangeText={(value) =>
                   setUserData({ ...userData, email: value })
                 }
+                editable={false}
               />
             </View>
+          </View>
 
+          <View style={{ gap: spacingY._20 }}>
             <View style={styles.inputContainer}>
               <Typo style={{ paddingLeft: spacingX._10 }}>Name</Typo>
-
               <Input
-                value={userData?.name || ""}
+                value={userData.name}
                 containerStyle={{
                   borderColor: colors.neutral350,
                   paddingLeft: spacingX._20,
+                  // backgroundColor: colors.neutral300
                 }}
                 onChangeText={(value) =>
                   setUserData({ ...userData, name: value })
                 }
+                // editable={false}
               />
             </View>
           </View>
@@ -159,12 +189,12 @@ const ProfileModal = () => {
       <View style={styles.footer}>
         {!loading && (
           <Button
-            onPress={showLogoutAlert}
             style={{
               backgroundColor: colors.rose,
               height: verticalScale(56),
               width: verticalScale(56),
             }}
+            onPress={showLogoutAlert}
           >
             <Icons.SignOutIcon
               size={verticalScale(30)}
@@ -173,8 +203,9 @@ const ProfileModal = () => {
             />
           </Button>
         )}
-        <Button loading={loading} onPress={onSubmit} style={{ flex: 1 }}>
-          <Typo fontWeight="bold" color={colors.white} size={18}>
+
+        <Button style={{ flex: 1 }} onPress={onSubmit} loading={loading}>
+          <Typo color={colors.black} fontWeight={"700"}>
             Update
           </Typo>
         </Button>
