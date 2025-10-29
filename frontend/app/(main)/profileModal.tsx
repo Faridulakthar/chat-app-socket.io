@@ -1,13 +1,66 @@
-import { Platform, ScrollView, StyleSheet, View } from "react-native";
-import React from "react";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import BackButton from "@/components/BackButton";
 import Avatar from "@/components/Avatar";
+import * as Icons from "phosphor-react-native";
+import Typo from "@/components/Typo";
+import Input from "@/components/Input";
+import { useAuth } from "@/context/authContext";
+import { UserProps } from "@/types";
+import Button from "@/components/Button";
+import { useRouter } from "expo-router";
 
 const ProfileModal = () => {
+  const router = useRouter();
+  const { user, signOut } = useAuth();
+
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState<UserProps>({
+    email: "",
+    name: "",
+    avatar: null,
+  });
+
+  useEffect(() => {
+    if (user) {
+      setUserData({
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar,
+      });
+    }
+  }, [user]);
+
+  const onSubmit = () => {};
+
+  const showLogoutAlert = () => {
+    Alert.alert("Confirm", "Are you sure you want to log out?", [
+      {
+        text: "Cancel",
+        onPress: () => {},
+      },
+      {
+        text: "Log Out",
+        onPress: async () => {
+          router.back();
+          await signOut();
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
   return (
     <ScreenWrapper isModal={true}>
       <View style={styles.container}>
@@ -23,9 +76,73 @@ const ProfileModal = () => {
 
         <ScrollView contentContainerStyle={styles.from}>
           <View style={styles.avatarContainer}>
-            <Avatar uri={""} />
+            <Avatar uri={null} size={170} />
+            <TouchableOpacity style={styles.editIcon}>
+              <Icons.PencilIcon
+                size={verticalScale(20)}
+                color={colors.neutral800}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ gap: spacingY._20 }}>
+            <View style={styles.inputContainer}>
+              <Typo style={{ paddingLeft: spacingX._10 }}>Email</Typo>
+
+              <Input
+                value={userData?.email || ""}
+                containerStyle={{
+                  borderColor: colors.neutral350,
+                  paddingLeft: spacingX._20,
+                  backgroundColor: colors.neutral300,
+                }}
+                editable={false}
+                onChangeText={(value) =>
+                  setUserData({ ...userData, email: value })
+                }
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Typo style={{ paddingLeft: spacingX._10 }}>Name</Typo>
+
+              <Input
+                value={userData?.name || ""}
+                containerStyle={{
+                  borderColor: colors.neutral350,
+                  paddingLeft: spacingX._20,
+                }}
+                onChangeText={(value) =>
+                  setUserData({ ...userData, name: value })
+                }
+              />
+            </View>
           </View>
         </ScrollView>
+      </View>
+
+      <View style={styles.footer}>
+        {!loading && (
+          <Button
+            onPress={showLogoutAlert}
+            style={{
+              backgroundColor: colors.rose,
+              height: verticalScale(56),
+              width: verticalScale(56),
+            }}
+          >
+            <Icons.SignOutIcon
+              size={verticalScale(30)}
+              color={colors.white}
+              weight="bold"
+            />
+          </Button>
+        )}
+        <Button loading={loading} onPress={onSubmit} style={{ flex: 1 }}>
+          <Typo fontWeight="bold" color={colors.white} size={18}>
+            Update
+          </Typo>
+        </Button>
       </View>
     </ScreenWrapper>
   );
