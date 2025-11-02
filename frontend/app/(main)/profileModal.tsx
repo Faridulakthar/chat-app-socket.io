@@ -7,6 +7,7 @@ import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/context/authContext";
+import { uploadFileToCloudinary } from "@/services/imageService";
 import { updateProfile } from "@/socket/socketEvents";
 import { UserDataProps } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
@@ -107,20 +108,20 @@ const ProfileModal = () => {
       avatar,
     };
 
-    // if (avatar && avatar?.uri) {
-    //   setLoading(true);
-    //   const res = await uploadFileToCloudinary(avatar, "profiles");
-    //   console.log("result: ", res);
-    //   if (res.success) {
-    //     data.avatar = res.data;
-    //   } else {
-    //     Alert.alert("User", res.msg);
-    //     setLoading(false);
-    //     return;
-    //   }
-    // }
+    if (avatar && avatar?.uri) {
+      setLoading(true);
+      const res = await uploadFileToCloudinary(avatar, "profiles");
+      // console.log("result: ", res);
+      if (res.success) {
+        data.avatar = res.data;
+      } else {
+        Alert.alert("User", res.msg);
+        setLoading(false);
+        return;
+      }
+    }
 
-    // setLoading(true);
+    setLoading(true);
     updateProfile(data);
   };
 
