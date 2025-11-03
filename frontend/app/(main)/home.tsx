@@ -183,6 +183,22 @@ const Home = () => {
           </ScrollView>
         </View>
       </View>
+
+      <Button
+        style={styles.floatingButton}
+        onPress={() =>
+          router.push({
+            pathname: "/(main)/newConversationModal",
+            params: { isGroup: selectedTab },
+          })
+        }
+      >
+        <Icons.PlusIcon
+          color={colors.black}
+          weight="bold"
+          size={verticalScale(24)}
+        />
+      </Button>
     </ScreenWrapper>
   );
 };
