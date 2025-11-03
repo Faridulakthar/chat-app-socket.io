@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { use, useEffect } from "react";
+import React, { use, useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import Button from "@/components/Button";
@@ -14,6 +14,8 @@ const Home = () => {
   const router = useRouter();
   const { user: currentUser, signOut } = useAuth();
 
+  const [selectedTab, setSelectedTab] = useState<number>(0);
+
   useEffect(() => {
     testSocket(testSocketCallbackHandler);
     testSocket(null);
@@ -26,6 +28,61 @@ const Home = () => {
   const testSocketCallbackHandler = (data: any) => {
     console.log("Got response from test socket", data);
   };
+
+  const conversations = [
+    {
+      name: "Arisu",
+      type: "direct",
+      lastMessage: {
+        senderName: "Arisu",
+        content: "We done with Diomend, How about U?",
+        createdAt: "2025-10-01T18:30:00Z",
+      },
+    },
+    {
+      name: "Michelle",
+      type: "direct",
+      lastMessage: {
+        senderName: "Michelle",
+        // attachement:{image:'url'},
+        content: "Tonight BREACKOUT!!!",
+        createdAt: "2025-10-04T15:05:00Z",
+      },
+    },
+    {
+      name: "Project Sona",
+      type: "group",
+      lastMessage: {
+        senderName: "Mahone",
+        content: "How about TBag",
+        createdAt: "2025-10-20T15:05:00Z",
+      },
+    },
+    {
+      name: "La Casa De Papel",
+      type: "group",
+      lastMessage: {
+        senderName: "Nirobi",
+        content: "Shut the Fuck up Tokyo",
+        createdAt: "2025-10-11T15:05:00Z",
+      },
+    },
+  ];
+
+  let directConversations = conversations
+    .filter((item: any) => item.type == "direct")
+    .sort((a: any, b: any) => {
+      const aDate = a?.lastMessage?.createdAt || a.createdAt;
+      const bDate = b?.lastMessage?.createdAt || b.createdAt;
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
+    });
+  let groupConversations = conversations
+    .filter((item: any) => item.type == "group")
+    .sort((a: any, b: any) => {
+      const aDate = a?.lastMessage?.createdAt || a.createdAt;
+      const bDate = b?.lastMessage?.createdAt || b.createdAt;
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
+    });
 
   return (
     <ScreenWrapper showPattern={true} bgOpacity={0.4}>
@@ -62,8 +119,30 @@ const Home = () => {
             contentContainerStyle={{ paddingVertical: spacingY._20 }}
           >
             <View style={styles.navBar}>
-              
+              <View style={styles.tabs}>
+                <TouchableOpacity
+                  onPress={() => setSelectedTab(0)}
+                  style={[
+                    styles.tabStyle,
+                    selectedTab == 0 && styles.activeTabStyle,
+                  ]}
+                >
+                  <Typo>Direct Messages</Typo>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setSelectedTab(1)}
+                  style={[
+                    styles.tabStyle,
+                    selectedTab == 1 && styles.activeTabStyle,
+                  ]}
+                >
+                  <Typo>Group</Typo>
+                </TouchableOpacity>
+              </View>
             </View>
+
+            <View style={styles.conversationList}></View>
           </ScrollView>
         </View>
       </View>
