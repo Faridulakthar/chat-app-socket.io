@@ -16,6 +16,7 @@ const Home = () => {
   const { user: currentUser, signOut } = useAuth();
 
   const [selectedTab, setSelectedTab] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     testSocket(testSocketCallbackHandler);
@@ -166,6 +167,19 @@ const Home = () => {
                   );
                 })}
             </View>
+
+            {!loading &&
+              selectedTab == 0 &&
+              directConversations.length == 0 && (
+                <Typo style={{ textAlign: "center" }}>
+                  You don't have any direct messages yet.
+                </Typo>
+              )}
+            {!loading && selectedTab == 1 && groupConversations.length == 0 && (
+              <Typo style={{ textAlign: "center" }}>
+                You don't have any group messages yet.
+              </Typo>
+            )}
           </ScrollView>
         </View>
       </View>
