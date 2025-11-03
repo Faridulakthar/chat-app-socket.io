@@ -9,6 +9,7 @@ import { testSocket } from "@/socket/socketEvents";
 import { verticalScale } from "@/utils/styling";
 import * as Icons from "phosphor-react-native";
 import { useRouter } from "expo-router";
+import ConversationItem from "@/components/ConversationItem";
 
 const Home = () => {
   const router = useRouter();
@@ -142,7 +143,29 @@ const Home = () => {
               </View>
             </View>
 
-            <View style={styles.conversationList}></View>
+            <View style={styles.conversationList}>
+              {selectedTab == 0 &&
+                directConversations?.map((item: any, index: number) => (
+                  <ConversationItem
+                    item={item}
+                    key={index}
+                    router={router}
+                    showDivider={directConversations.length != index + 1}
+                  />
+                ))}
+
+              {selectedTab == 1 &&
+                groupConversations.map((item: any, index) => {
+                  return (
+                    <ConversationItem
+                      item={item}
+                      key={index}
+                      router={router}
+                      showDivider={directConversations.length != index + 1}
+                    />
+                  );
+                })}
+            </View>
           </ScrollView>
         </View>
       </View>
