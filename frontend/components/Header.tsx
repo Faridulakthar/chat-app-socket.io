@@ -1,6 +1,6 @@
-import { StyleSheet, View } from "react-native";
-import React from "react";
 import { HeaderProps } from "@/types";
+import React from "react";
+import { StyleSheet, View } from "react-native";
 import Typo from "./Typo";
 
 const Header = ({ title = "", leftIcon, rightIcon, style }: HeaderProps) => {
@@ -9,7 +9,7 @@ const Header = ({ title = "", leftIcon, rightIcon, style }: HeaderProps) => {
       {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
 
       {title && (
-        <Typo size={22} fontWeight={"600"} style={styles.title}>
+        <Typo size={18} fontWeight={"600"} style={styles.title}>
           {title}
         </Typo>
       )}
