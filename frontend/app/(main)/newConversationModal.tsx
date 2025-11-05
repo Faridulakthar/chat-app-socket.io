@@ -1,16 +1,109 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useState } from "react";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import BackButton from "@/components/BackButton";
+import Avatar from "@/components/Avatar";
+import * as ImagePicker from "expo-image-picker";
+import Input from "@/components/Input";
+import Typo from "@/components/Typo";
+import { useAuth } from "@/context/authContext";
+import Button from "@/components/Button";
+import { uploadFileToCloudinary } from "@/services/imageService";
 
 const NewConversationModal = () => {
   const { isGroup } = useLocalSearchParams();
-  const isGroupConversation = isGroup === "1";
+  const isGroupMode = isGroup === "1";
   const router = useRouter();
+  const { user: currentUser } = useAuth();
+  const [groupAvatar, setGroupAvatar] = useState<{ uri: string } | null>(null);
+  const [groupName, setGroupName] = useState("");
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
+    []
+  );
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onPickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      //   allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setGroupAvatar(result.assets[0]);
+    }
+  };
+
+  const toggleParticipant = (user: any) => {
+    setSelectedParticipants((prev: any) => {
+      if (prev.includes(user.id)) {
+        return prev.filter((id: string) => id != user.id);
+      }
+      return [...prev, user.id];
+    });
+  };
+
+  const onSelectUser = (user: any) => {
+    if (!currentUser) {
+      Alert.alert("Authentication", "Please login to start a conversation.");
+      return;
+    }
+
+    if (isGroupMode) {
+      toggleParticipant(user);
+    } else {
+      //direct conversation
+    //   newConversation({
+    //     type: "direct",
+    //     participants: [currentUser.id, user.id],
+    //   });
+    }
+  };
+
+    const createGroup = async () => {
+      if (!groupName.trim() || !currentUser || selectedParticipants.length < 2) {
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        let avatar = null;
+        if (groupAvatar) {
+          const uploadResult = await uploadFileToCloudinary(
+            groupAvatar,
+            "group-avatars"
+          );
+          if (uploadResult.success) avatar = uploadResult.data;
+        }
+
+        // newConversation({
+        //   type: "group",
+        //   participants: [currentUser.id, ...selectedParticipants],
+        //   name: groupName,
+        //   avatar,
+        // });
+      } catch (error: any) {
+        console.log("Error creating group: ", error);
+        Alert.alert("Error", error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   const contacts = [
     {
@@ -34,10 +127,75 @@ const NewConversationModal = () => {
     <ScreenWrapper isModal={true}>
       <View style={styles.container}>
         <Header
-          title={isGroupConversation ? "New Group" : "Select User"}
+          title={isGroupMode ? "New Group" : "Select User"}
           leftIcon={<BackButton color={colors.black} />}
           rightIcon={<></>}
         />
+
+        {isGroupMode && (
+          <View style={styles.groupInfoContainer}>
+            <View style={styles.avatarContainer}>
+              <TouchableOpacity onPress={onPickImage}>
+                <Avatar
+                  uri={groupAvatar?.uri || null}
+                  size={90}
+                  isGroup={true}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.groupNameContainer}>
+              <Input
+                placeholder="Group Name"
+                value={groupName}
+                onChangeText={setGroupName}
+              />
+            </View>
+          </View>
+        )}
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contactList}
+        >
+          {contacts.map((user: any, index) => {
+            const isSelected = selectedParticipants.includes(user.id);
+            return (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.contactRow,
+                  isSelected && styles.selectedContact,
+                ]}
+                onPress={() => onSelectUser(user)}
+              >
+                <Avatar size={45} uri={user.avatar} />
+                <Typo fontWeight={"500"}>{user.name}</Typo>
+                {isGroupMode && (
+                  <View style={styles.sectionIndicator}>
+                    <View
+                      style={[styles.checkbox, isSelected && styles.checked]}
+                    />
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {isGroupMode && selectedParticipants.length >= 2 && (
+          <View style={styles.createGroupButton}>
+            <Button
+              onPress={createGroup}
+              disabled={!groupName.trim()}
+              loading={isLoading}
+            >
+              <Typo fontWeight={"bold"} size={17}>
+                Create Group
+              </Typo>
+            </Button>
+          </View>
+        )}
       </View>
     </ScreenWrapper>
   );
@@ -62,7 +220,7 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 24,
     height: 25,
-    borderRadius: 5,
+    borderRadius: 50,
     borderWidth: 3,
     borderColor: colors.primary,
   },
