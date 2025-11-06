@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -20,12 +20,14 @@ import Typo from "@/components/Typo";
 import { useAuth } from "@/context/authContext";
 import Button from "@/components/Button";
 import { uploadFileToCloudinary } from "@/services/imageService";
+import { getContacts } from "@/socket/socketEvents";
 
 const NewConversationModal = () => {
   const { isGroup } = useLocalSearchParams();
   const isGroupMode = isGroup === "1";
   const router = useRouter();
   const { user: currentUser } = useAuth();
+  const [contacts, setContacts] = useState([]);
   const [groupAvatar, setGroupAvatar] = useState<{ uri: string } | null>(null);
   const [groupName, setGroupName] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
@@ -33,6 +35,21 @@ const NewConversationModal = () => {
   );
 
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    getContacts(processGetContacts);
+
+    return () => {
+      getContacts(processGetContacts, true);
+    };
+  }, []);
+
+  const processGetContacts = async (res: any) => {
+    console.log("got contacts", res);
+    if (res.success) {
+      setContacts(res.data);
+    }
+  };
 
   const onPickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -68,60 +85,60 @@ const NewConversationModal = () => {
       toggleParticipant(user);
     } else {
       //direct conversation
-    //   newConversation({
-    //     type: "direct",
-    //     participants: [currentUser.id, user.id],
-    //   });
+      //   newConversation({
+      //     type: "direct",
+      //     participants: [currentUser.id, user.id],
+      //   });
     }
   };
 
-    const createGroup = async () => {
-      if (!groupName.trim() || !currentUser || selectedParticipants.length < 2) {
-        return;
+  const createGroup = async () => {
+    if (!groupName.trim() || !currentUser || selectedParticipants.length < 2) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      let avatar = null;
+      if (groupAvatar) {
+        const uploadResult = await uploadFileToCloudinary(
+          groupAvatar,
+          "group-avatars"
+        );
+        if (uploadResult.success) avatar = uploadResult.data;
       }
 
-      setIsLoading(true);
-      try {
-        let avatar = null;
-        if (groupAvatar) {
-          const uploadResult = await uploadFileToCloudinary(
-            groupAvatar,
-            "group-avatars"
-          );
-          if (uploadResult.success) avatar = uploadResult.data;
-        }
+      // newConversation({
+      //   type: "group",
+      //   participants: [currentUser.id, ...selectedParticipants],
+      //   name: groupName,
+      //   avatar,
+      // });
+    } catch (error: any) {
+      console.log("Error creating group: ", error);
+      Alert.alert("Error", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        // newConversation({
-        //   type: "group",
-        //   participants: [currentUser.id, ...selectedParticipants],
-        //   name: groupName,
-        //   avatar,
-        // });
-      } catch (error: any) {
-        console.log("Error creating group: ", error);
-        Alert.alert("Error", error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-  const contacts = [
-    {
-      id: "1",
-      name: "Jaime Lannister",
-      avatar: "https://i.pravatar.cc/150?img=11",
-    },
-    {
-      id: "2",
-      name: "Sansa Stark",
-      avatar: "https://i.pravatar.cc/150?img=12",
-    },
-    {
-      id: "3",
-      name: "Yara Greyjoy",
-      avatar: "https://i.pravatar.cc/150?img=13",
-    },
-  ];
+  //   const contacts = [
+  //     {
+  //       id: "1",
+  //       name: "Jaime Lannister",
+  //       avatar: "https://i.pravatar.cc/150?img=11",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Sansa Stark",
+  //       avatar: "https://i.pravatar.cc/150?img=12",
+  //     },
+  //     {
+  //       id: "3",
+  //       name: "Yara Greyjoy",
+  //       avatar: "https://i.pravatar.cc/150?img=13",
+  //     },
+  //   ];
 
   return (
     <ScreenWrapper isModal={true}>
