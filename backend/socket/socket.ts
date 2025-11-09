@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { Server as SocketIOServer, Socket } from "socket.io";
 import { registerUserEvents } from "./userEvents";
+import { registerChatEvents } from "./chatEvents";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ export function initializeSocket(server: any) {
     );
 
     // register events
+    registerChatEvents(io, socket);
     registerUserEvents(io, socket);
 
     socket.on("disconnect", () => {

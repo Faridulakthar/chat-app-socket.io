@@ -38,6 +38,7 @@ const NewConversationModal = () => {
 
   useEffect(() => {
     getContacts(processGetContacts);
+    getContacts(null);
 
     return () => {
       getContacts(processGetContacts, true);
