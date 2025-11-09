@@ -20,7 +20,7 @@ import Typo from "@/components/Typo";
 import { useAuth } from "@/context/authContext";
 import Button from "@/components/Button";
 import { uploadFileToCloudinary } from "@/services/imageService";
-import { getContacts } from "@/socket/socketEvents";
+import { getContacts, newConversation } from "@/socket/socketEvents";
 
 const NewConversationModal = () => {
   const { isGroup } = useLocalSearchParams();
@@ -38,10 +38,12 @@ const NewConversationModal = () => {
 
   useEffect(() => {
     getContacts(processGetContacts);
+    newConversation(populateNewConversation);
     getContacts(null);
 
     return () => {
       getContacts(processGetContacts, true);
+      newConversation(populateNewConversation, true);
     };
   }, []);
 
@@ -49,6 +51,12 @@ const NewConversationModal = () => {
     console.log("got contacts", res);
     if (res.success) {
       setContacts(res.data);
+    }
+  };
+
+  const populateNewConversation = (res: any) => {
+    console.log("New conversation created", res);
+    if (res.success) {
     }
   };
 
@@ -86,10 +94,10 @@ const NewConversationModal = () => {
       toggleParticipant(user);
     } else {
       //direct conversation
-      //   newConversation({
-      //     type: "direct",
-      //     participants: [currentUser.id, user.id],
-      //   });
+      newConversation({
+        type: "direct",
+        participants: [currentUser.id, user.id],
+      });
     }
   };
 
