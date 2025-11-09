@@ -24,6 +24,17 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
           });
         }
       }
+
+      // create new conversation
+      const newConversation = new Conversation({
+        type: data.type,
+        name: data.name || "", // name can be empty for direct conversations
+        avatar: data.avatar || "",
+        participants: data.participants,
+        createdBy: socket.data.userId,
+      });
+
+      
     } catch (error: any) {
       console.log("newConversation error:", error);
       socket.emit("newConversation", {
