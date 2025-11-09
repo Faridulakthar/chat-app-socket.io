@@ -26,7 +26,7 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
       }
 
       // create new conversation
-      const newConversation = new Conversation({
+      const conversation = await Conversation.create({
         type: data.type,
         name: data.name || "", // name can be empty for direct conversations
         avatar: data.avatar || "",
@@ -39,7 +39,29 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
         (s) => data.participants.includes(s.data.userId)
       );
 
-      
+      //   join this conversation by all online participatns
+      connectedSockets.forEach((participatnsSocket) => {
+        participatnsSocket.join(conversation._id.toString());
+      });
+
+      //   send back the new conversation
+
+      const populateConversation = await Conversation.findById(
+        conversation._id
+      ).populate({
+        path: "participants",
+        select: "name avatar email",
+      });
+
+      if (!populateConversation) {
+        throw new Error("Failed to populate conversation");
+      }
+
+      //   emit conversation to all users
+      io.to(conversation._id.toString()).emit("newConversation", {
+        success: true,
+        data: { ...populateConversation, isNew: true },
+      });
     } catch (error: any) {
       console.log("newConversation error:", error);
       socket.emit("newConversation", {
