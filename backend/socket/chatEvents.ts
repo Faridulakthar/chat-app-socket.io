@@ -34,6 +34,11 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
         createdBy: socket.data.userId,
       });
 
+      // get all connected users
+      const connectedSockets = Array.from(io.sockets.sockets.values()).filter(
+        (s) => data.participants.includes(s.data.userId)
+      );
+
       
     } catch (error: any) {
       console.log("newConversation error:", error);
