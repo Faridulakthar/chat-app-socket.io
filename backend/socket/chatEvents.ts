@@ -5,7 +5,7 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
   socket.on("getConversations", async (data) => {
     console.log("getConversations event", data);
     try {
-      const userId = socket.data.userdId;
+      const userId = socket.data.userId;
 
       if (!userId) {
         return socket.emit("getConversations", {
