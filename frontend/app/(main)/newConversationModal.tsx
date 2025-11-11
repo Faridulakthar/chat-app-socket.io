@@ -57,6 +57,20 @@ const NewConversationModal = () => {
   const populateNewConversation = (res: any) => {
     console.log("New conversation created", res);
     if (res.success) {
+      router.back();
+      router.push({
+        pathname: "/(main)/conversation",
+        params: {
+          id: res.data._id,
+          name: res.data.name,
+          avatar: res.data.avatar,
+          type: res.data.type,
+          participants: JSON.stringify(res.data.participants),
+        },
+      });
+    } else {
+      console.log("Error fetching message: ", res.msg);
+      Alert.alert("Error", res.msg || "Failed to create conversation.");
     }
   };
 
@@ -117,12 +131,12 @@ const NewConversationModal = () => {
         if (uploadResult.success) avatar = uploadResult.data;
       }
 
-      // newConversation({
-      //   type: "group",
-      //   participants: [currentUser.id, ...selectedParticipants],
-      //   name: groupName,
-      //   avatar,
-      // });
+      newConversation({
+        type: "group",
+        participants: [currentUser.id, ...selectedParticipants],
+        name: groupName,
+        avatar,
+      });
     } catch (error: any) {
       console.log("Error creating group: ", error);
       Alert.alert("Error", error.message);
