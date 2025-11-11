@@ -167,7 +167,7 @@ const Home = () => {
 
             <View style={styles.conversationList}>
               {selectedTab == 0 &&
-                directConversations?.map((item: any, index: number) => (
+                directConversations?.map((item: ConversationProps, index: number) => (
                   <ConversationItem
                     item={item}
                     key={index}
@@ -177,7 +177,7 @@ const Home = () => {
                 ))}
 
               {selectedTab == 1 &&
-                groupConversations.map((item: any, index) => {
+                groupConversations.map((item: ConversationProps, index) => {
                   return (
                     <ConversationItem
                       item={item}
