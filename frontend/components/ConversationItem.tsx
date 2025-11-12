@@ -4,12 +4,24 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Avatar from "./Avatar";
 import Typo from "./Typo";
+import { ConversationListItemProps } from "@/types";
+import { useAuth } from "@/context/authContext";
 
-const ConversationItem = ({ item, showDivider, router }: any) => {
+const ConversationItem = ({
+  item,
+  showDivider,
+  router,
+}: ConversationListItemProps) => {
   const openConversation = () => {};
+
+  const { user: currentUser } = useAuth();
 
   const lastMessage: any = item.lastMessage;
   const isDirect = item.type == "direct";
+  const avatar = item.avatar;
+  const otherParticipant = isDirect
+    ? item.participants.find((p) => p._id !== currentUser?.id)
+    : null;
 
   const getLastMessageContent = () => {
     if (!lastMessage) return "Say Hey 👻";
@@ -40,7 +52,7 @@ const ConversationItem = ({ item, showDivider, router }: any) => {
         onPress={openConversation}
       >
         <View>
-          <Avatar uri={null} size={47} isGroup={item.type == "group"} />
+          <Avatar uri={avatar} size={47} isGroup={item.type == "group"} />
         </View>
 
         <View style={{ flex: 1 }}>
