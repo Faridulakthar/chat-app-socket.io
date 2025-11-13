@@ -34,7 +34,6 @@ const Home = () => {
     console.log("got conversations: ", res);
     setLoading(false);
     if (res.success) {
-      console.log(res?.data, "HOla");
       setConversations(res.data);
     }
   };

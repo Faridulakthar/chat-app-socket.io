@@ -18,10 +18,14 @@ const ConversationItem = ({
 
   const lastMessage: any = item.lastMessage;
   const isDirect = item.type == "direct";
-  const avatar = item.avatar;
+  let avatar = item.avatar;
   const otherParticipant = isDirect
     ? item.participants.find((p) => p._id !== currentUser?.id)
     : null;
+
+  if (isDirect && otherParticipant) {
+    avatar = otherParticipant.avatar;
+  }
 
   const getLastMessageContent = () => {
     if (!lastMessage) return "Say Hey 👻";
@@ -58,7 +62,9 @@ const ConversationItem = ({
         <View style={{ flex: 1 }}>
           <View style={styles.row}>
             <Typo size={16} fontWeight={"600"}>
-              {item?.name}
+              {item?.type == "direct"
+                ? otherParticipant?.name || "Unknown User"
+                : item.name}
             </Typo>
             {item.lastMessage && <Typo size={15}>{getLastMessageDate()}</Typo>}
           </View>
