@@ -12,8 +12,6 @@ const ConversationItem = ({
   showDivider,
   router,
 }: ConversationListItemProps) => {
-  const openConversation = () => {};
-
   const { user: currentUser } = useAuth();
 
   const lastMessage: any = item.lastMessage;
@@ -47,6 +45,19 @@ const ConversationItem = ({
     }
 
     return messageDate.format("MMM D, YYYY");
+  };
+
+  const openConversation = () => {
+    router.push({
+      pathname: "/(main)/conversation",
+      params: {
+        id: item._id,
+        name: item.name,
+        type: item.type,
+        avatar: avatar,
+        participants: JSON.stringify(item.participants),
+      },
+    });
   };
 
   return (
