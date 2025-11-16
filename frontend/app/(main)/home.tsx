@@ -5,7 +5,11 @@ import Typo from "@/components/Typo";
 import Button from "@/components/Button";
 import { useAuth } from "@/context/authContext";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
-import { getConversations, testSocket } from "@/socket/socketEvents";
+import {
+  getConversations,
+  newConversation,
+  testSocket,
+} from "@/socket/socketEvents";
 import { verticalScale } from "@/utils/styling";
 import * as Icons from "phosphor-react-native";
 import { useRouter } from "expo-router";
@@ -23,10 +27,13 @@ const Home = () => {
 
   useEffect(() => {
     getConversations(processConversations);
+    newConversation(newConversationHandler);
+
     getConversations(null);
 
     return () => {
       getConversations(processConversations, true);
+      getConversations(newConversationHandler, true);
     };
   }, []);
 
@@ -35,6 +42,12 @@ const Home = () => {
     setLoading(false);
     if (res.success) {
       setConversations(res.data);
+    }
+  };
+
+  const newConversationHandler = (res: ResponseProps) => {
+    if (res?.success && res?.data?.isNew) {
+      setConversations((prev) => [...prev, res?.data]);
     }
   };
 
@@ -166,14 +179,16 @@ const Home = () => {
 
             <View style={styles.conversationList}>
               {selectedTab == 0 &&
-                directConversations?.map((item: ConversationProps, index: number) => (
-                  <ConversationItem
-                    item={item}
-                    key={index}
-                    router={router}
-                    showDivider={directConversations.length != index + 1}
-                  />
-                ))}
+                directConversations?.map(
+                  (item: ConversationProps, index: number) => (
+                    <ConversationItem
+                      item={item}
+                      key={index}
+                      router={router}
+                      showDivider={directConversations.length != index + 1}
+                    />
+                  )
+                )}
 
               {selectedTab == 1 &&
                 groupConversations.map((item: ConversationProps, index) => {
