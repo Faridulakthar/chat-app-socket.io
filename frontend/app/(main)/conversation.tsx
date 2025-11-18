@@ -19,6 +19,8 @@ import {
 import * as Icons from "phosphor-react-native";
 import MessageItem from "@/components/MessageItem";
 import Input from "@/components/Input";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 
 const Conversation = () => {
   const router = useRouter();
@@ -34,6 +36,9 @@ const Conversation = () => {
   } = data;
 
   const [message, setMessage] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<{ uri: string } | null>(
+    null
+  );
 
   const participants = JSON.parse(stringifiedPariticipants as string);
 
@@ -97,7 +102,20 @@ const Conversation = () => {
     },
   ];
 
-  const onPickFile = async () => {};
+  const onPickFile = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      //   allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setSelectedFile(result.assets[0]);
+    }
+  };
 
   return (
     <ScreenWrapper showPattern={true} bgOpacity={0.5}>
@@ -161,6 +179,13 @@ const Conversation = () => {
                     weight="bold"
                     size={verticalScale(22)}
                   />
+
+                  {selectedFile && selectedFile?.uri && (
+                    <Image
+                      source={selectedFile?.uri}
+                      style={styles.selectedFile}
+                    />
+                  )}
                 </TouchableOpacity>
               }
             />
