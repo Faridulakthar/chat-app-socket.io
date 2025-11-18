@@ -7,7 +7,7 @@ import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/context/authContext";
 import { scale, verticalScale } from "@/utils/styling";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import * as Icons from "phosphor-react-native";
 import MessageItem from "@/components/MessageItem";
+import Input from "@/components/Input";
 
 const Conversation = () => {
   const router = useRouter();
@@ -31,6 +32,8 @@ const Conversation = () => {
     avatar,
     participants: stringifiedPariticipants,
   } = data;
+
+  const [message, setMessage] = useState<string>("");
 
   const participants = JSON.parse(stringifiedPariticipants as string);
 
@@ -88,7 +91,7 @@ const Conversation = () => {
         name: "Jane Smith",
         avatar: null,
       },
-    content: "Hey",
+      content: "Hey",
       createdAt: "2024-10-01T10:05:00Z",
       isMe: false,
     },
@@ -138,6 +141,19 @@ const Conversation = () => {
             )}
             keyExtractor={(item) => item.id}
           />
+
+          <View style={styles.footer}>
+            <Input
+              value={message}
+              onChangeText={setMessage}
+              containerStyle={{
+                paddingLeft: spacingX._10,
+                paddingRight: scale(65),
+                borderWidth: 0,
+              }}
+              placeholder="Type Message"
+            />
+          </View>
         </View>
       </KeyboardAvoidingView>
     </ScreenWrapper>
