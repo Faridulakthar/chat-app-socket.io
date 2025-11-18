@@ -117,6 +117,8 @@ const Conversation = () => {
     }
   };
 
+  const onSend = () => {};
+
   return (
     <ScreenWrapper showPattern={true} bgOpacity={0.5}>
       <KeyboardAvoidingView
@@ -189,6 +191,16 @@ const Conversation = () => {
                 </TouchableOpacity>
               }
             />
+
+            <View style={styles.InputRightIcon}>
+              <TouchableOpacity style={styles.inputIcon} onPress={onSend}>
+                <Icons.PaperPlaneTiltIcon
+                  color={colors.black}
+                  weight="bold"
+                  size={verticalScale(22)}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
