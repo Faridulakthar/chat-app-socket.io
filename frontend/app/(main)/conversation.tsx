@@ -1,7 +1,8 @@
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
-import { colors } from "@/constants/theme";
+import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/context/authContext";
+import { scale, verticalScale } from "@/utils/styling";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { StyleSheet } from "react-native";
