@@ -6,7 +6,7 @@ import Typo from "@/components/Typo";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/context/authContext";
 import { scale, verticalScale } from "@/utils/styling";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
   FlatList,
@@ -17,8 +17,10 @@ import {
   View,
 } from "react-native";
 import * as Icons from "phosphor-react-native";
+import MessageItem from "@/components/MessageItem";
 
 const Conversation = () => {
+  const router = useRouter();
   const { user: currentUser } = useAuth();
   const data = useLocalSearchParams();
 
@@ -49,33 +51,44 @@ const Conversation = () => {
     {
       id: "msg_10",
       sender: {
-        id: "user_2",
+        id: "user_1",
         name: "Jane Smith",
-        avatar: "https://i.pravatar.cc/150?img=2",
+        avatar: null,
       },
       content: "Hello! How are you?",
       createdAt: "2024-10-01T10:05:00Z",
-      isMe: false,
+      isMe: true,
     },
     {
       id: "msg_11",
       sender: {
         id: "user_2",
         name: "Jane Smith",
-        avatar: "https://i.pravatar.cc/150?img=2",
+        avatar: null,
       },
       content: "Yeah, I'm doing good too. Thanks for asking!",
+      createdAt: "2024-10-01T10:05:00Z",
+      isMe: false,
+    },
+    {
+      id: "msg_12",
+      sender: {
+        id: "user_1",
+        name: "Jane Smith",
+        avatar: null,
+      },
+      content: "What's up? Long time no see.",
       createdAt: "2024-10-01T10:05:00Z",
       isMe: true,
     },
     {
       id: "msg_13",
       sender: {
-        id: "user_1",
+        id: "user_2",
         name: "Jane Smith",
-        avatar: "https://i.pravatar.cc/150?img=2",
+        avatar: null,
       },
-      content: "What's up?",
+    content: "Hey",
       createdAt: "2024-10-01T10:05:00Z",
       isMe: false,
     },
@@ -120,7 +133,9 @@ const Conversation = () => {
             inverted={true}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.messagesContent}
-            renderItem={(item) => <MessageItem />}
+            renderItem={({ item }) => (
+              <MessageItem item={item} isDirect={isDirect} />
+            )}
             keyExtractor={(item) => item.id}
           />
         </View>

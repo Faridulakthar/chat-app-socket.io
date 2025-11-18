@@ -1,11 +1,12 @@
-import { Text, TextStyle } from "react-native";
-import React from "react";
+import { colors } from "@/constants/theme";
 import { TypoProps } from "@/types";
 import { verticalScale } from "@/utils/styling";
+import React from "react";
+import { Text, TextStyle } from "react-native";
 
 const Typo = ({
   size = 16,
-  color,
+  color = colors.text,
   fontWeight = "400",
   children,
   style,
@@ -17,7 +18,13 @@ const Typo = ({
     fontWeight,
   };
 
-  return <Text style={[textStyle, { ...textProps }]}>{children}</Text>;
+  return (
+    <Text style={[textStyle, style]} {...textProps}>
+      {children}
+    </Text>
+  );
 };
 
 export default Typo;
+
+// const styles = StyleSheet.create({});
