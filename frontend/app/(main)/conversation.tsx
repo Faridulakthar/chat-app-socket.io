@@ -97,6 +97,8 @@ const Conversation = () => {
     },
   ];
 
+  const onPickFile = async () => {};
+
   return (
     <ScreenWrapper showPattern={true} bgOpacity={0.5}>
       <KeyboardAvoidingView
@@ -152,6 +154,15 @@ const Conversation = () => {
                 borderWidth: 0,
               }}
               placeholder="Type Message"
+              icon={
+                <TouchableOpacity style={styles.inputIcon} onPress={onPickFile}>
+                  <Icons.PlusIcon
+                    color={colors.black}
+                    weight="bold"
+                    size={verticalScale(22)}
+                  />
+                </TouchableOpacity>
+              }
             />
           </View>
         </View>
