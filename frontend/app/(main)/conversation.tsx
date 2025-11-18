@@ -1,3 +1,6 @@
+import Avatar from "@/components/Avatar";
+import BackButton from "@/components/BackButton";
+import Header from "@/components/Header";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
@@ -5,7 +8,14 @@ import { useAuth } from "@/context/authContext";
 import { scale, verticalScale } from "@/utils/styling";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import * as Icons from "phosphor-react-native";
 
 const Conversation = () => {
   const { user: currentUser } = useAuth();
@@ -35,8 +45,40 @@ const Conversation = () => {
   let conversationName = isDirect ? otherParticipant?.name : (name as string);
 
   return (
-    <ScreenWrapper>
-      <Typo color={colors.white}>Conversation</Typo>
+    <ScreenWrapper showPattern={true} bgOpacity={0.5}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        {/* Header */}
+        <Header
+          style={styles.header}
+          leftIcon={
+            <View style={styles.headerLeft}>
+              <BackButton />
+              <Avatar
+                uri={conversationAvatar as string}
+                size={40}
+                isGroup={type === "group"}
+              />
+              <Typo color={colors.white} size={22} fontWeight={"500"}>
+                {conversationName}
+              </Typo>
+            </View>
+          }
+          rightIcon={
+            <TouchableOpacity>
+              <Icons.DotsThreeOutlineVerticalIcon
+                weight="fill"
+                color={colors.white}
+              />
+            </TouchableOpacity>
+          }
+        />
+
+
+        {/* Message */}
+      </KeyboardAvoidingView>
     </ScreenWrapper>
   );
 };
