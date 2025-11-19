@@ -21,6 +21,7 @@ import MessageItem from "@/components/MessageItem";
 import Input from "@/components/Input";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
+import Loader from "@/components/Loader";
 
 const Conversation = () => {
   const router = useRouter();
@@ -39,6 +40,7 @@ const Conversation = () => {
   const [selectedFile, setSelectedFile] = useState<{ uri: string } | null>(
     null
   );
+  const [loading, setLoading] = useState(false);
 
   const participants = JSON.parse(stringifiedPariticipants as string);
 
@@ -117,7 +119,7 @@ const Conversation = () => {
     }
   };
 
-  const onSend = () => {};
+  const onSend = async () => {};
 
   return (
     <ScreenWrapper showPattern={true} bgOpacity={0.5}>
@@ -194,11 +196,15 @@ const Conversation = () => {
 
             <View style={styles.InputRightIcon}>
               <TouchableOpacity style={styles.inputIcon} onPress={onSend}>
-                <Icons.PaperPlaneTiltIcon
-                  color={colors.black}
-                  weight="bold"
-                  size={verticalScale(22)}
-                />
+                {loading ? (
+                  <Loader size="small" />
+                ) : (
+                  <Icons.PaperPlaneTiltIcon
+                    color={colors.black}
+                    weight="bold"
+                    size={verticalScale(22)}
+                  />
+                )}
               </TouchableOpacity>
             </View>
           </View>
