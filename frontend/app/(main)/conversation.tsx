@@ -9,6 +9,7 @@ import { scale, verticalScale } from "@/utils/styling";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
+  FlatList,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -44,6 +45,42 @@ const Conversation = () => {
 
   let conversationName = isDirect ? otherParticipant?.name : (name as string);
 
+  const dummyMessages = [
+    {
+      id: "msg_10",
+      sender: {
+        id: "user_2",
+        name: "Jane Smith",
+        avatar: "https://i.pravatar.cc/150?img=2",
+      },
+      content: "Hello! How are you?",
+      createdAt: "2024-10-01T10:05:00Z",
+      isMe: false,
+    },
+    {
+      id: "msg_11",
+      sender: {
+        id: "user_2",
+        name: "Jane Smith",
+        avatar: "https://i.pravatar.cc/150?img=2",
+      },
+      content: "Yeah, I'm doing good too. Thanks for asking!",
+      createdAt: "2024-10-01T10:05:00Z",
+      isMe: true,
+    },
+    {
+      id: "msg_13",
+      sender: {
+        id: "user_1",
+        name: "Jane Smith",
+        avatar: "https://i.pravatar.cc/150?img=2",
+      },
+      content: "What's up?",
+      createdAt: "2024-10-01T10:05:00Z",
+      isMe: false,
+    },
+  ];
+
   return (
     <ScreenWrapper showPattern={true} bgOpacity={0.5}>
       <KeyboardAvoidingView
@@ -76,8 +113,17 @@ const Conversation = () => {
           }
         />
 
-
         {/* Message */}
+        <View style={styles.content}>
+          <FlatList
+            data={dummyMessages}
+            inverted={true}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.messagesContent}
+            renderItem={(item) => <MessageItem />}
+            keyExtractor={(item) => item.id}
+          />
+        </View>
       </KeyboardAvoidingView>
     </ScreenWrapper>
   );
