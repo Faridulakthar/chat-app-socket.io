@@ -9,6 +9,7 @@ import { scale, verticalScale } from "@/utils/styling";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -22,6 +23,7 @@ import Input from "@/components/Input";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
 import Loader from "@/components/Loader";
+import { uploadFileToCloudinary } from "@/services/imageService";
 
 const Conversation = () => {
   const router = useRouter();
@@ -119,7 +121,41 @@ const Conversation = () => {
     }
   };
 
-  const onSend = async () => {};
+  const onSend = async () => {
+    if (!message?.trim() && !selectedFile) return;
+
+    if (!currentUser) return;
+
+    setLoading(true);
+
+    try {
+      let attachment = null;
+
+      if (selectedFile) {
+        const uploadResult = await uploadFileToCloudinary(
+          selectedFile,
+          "mesage-attachments"
+        );
+
+        if (uploadResult?.success) {
+          attachment = uploadResult.data;
+          console.log({ attachment });
+        } else {
+          Alert.alert(
+            "Image Upload",
+            uploadResult?.msg || "Failed to upload image"
+          );
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (error: any) {
+      console.log("Error sending message", error);
+      Alert.alert("Message", error.message || "Failed to send message");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScreenWrapper showPattern={true} bgOpacity={0.5}>
@@ -144,7 +180,7 @@ const Conversation = () => {
             </View>
           }
           rightIcon={
-            <TouchableOpacity>
+            <TouchableOpacity style={{ marginVertical: verticalScale(7) }}>
               <Icons.DotsThreeOutlineVerticalIcon
                 weight="fill"
                 color={colors.white}
