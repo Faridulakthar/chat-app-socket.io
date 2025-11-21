@@ -1,15 +1,11 @@
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import Button from "@/components/Button";
 import { useAuth } from "@/context/authContext";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
-import {
-  getConversations,
-  newConversation,
-  testSocket,
-} from "@/socket/socketEvents";
+import { getConversations, newConversation } from "@/socket/socketEvents";
 import { verticalScale } from "@/utils/styling";
 import * as Icons from "phosphor-react-native";
 import { useRouter } from "expo-router";
@@ -18,7 +14,7 @@ import { ConversationProps, ResponseProps } from "@/types";
 
 const Home = () => {
   const router = useRouter();
-  const { user: currentUser, signOut } = useAuth();
+  const { user: currentUser } = useAuth();
 
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -105,14 +101,14 @@ const Home = () => {
   // ];
 
   let directConversations = conversations
-    .filter((item: ConversationProps) => item.type == "direct")
+    .filter((item: ConversationProps) => item.type === "direct")
     .sort((a: ConversationProps, b: ConversationProps) => {
       const aDate = a?.lastMessage?.createdAt || a.createdAt;
       const bDate = b?.lastMessage?.createdAt || b.createdAt;
       return new Date(bDate).getTime() - new Date(aDate).getTime();
     });
   let groupConversations = conversations
-    .filter((item: ConversationProps) => item.type == "group")
+    .filter((item: ConversationProps) => item.type === "group")
     .sort((a: ConversationProps, b: ConversationProps) => {
       const aDate = a?.lastMessage?.createdAt || a.createdAt;
       const bDate = b?.lastMessage?.createdAt || b.createdAt;
@@ -159,7 +155,7 @@ const Home = () => {
                   onPress={() => setSelectedTab(0)}
                   style={[
                     styles.tabStyle,
-                    selectedTab == 0 && styles.activeTabStyle,
+                    selectedTab === 0 && styles.activeTabStyle,
                   ]}
                 >
                   <Typo>Direct Messages</Typo>
@@ -169,7 +165,7 @@ const Home = () => {
                   onPress={() => setSelectedTab(1)}
                   style={[
                     styles.tabStyle,
-                    selectedTab == 1 && styles.activeTabStyle,
+                    selectedTab === 1 && styles.activeTabStyle,
                   ]}
                 >
                   <Typo>Group</Typo>
@@ -178,7 +174,7 @@ const Home = () => {
             </View>
 
             <View style={styles.conversationList}>
-              {selectedTab == 0 &&
+              {selectedTab === 0 &&
                 directConversations?.map(
                   (item: ConversationProps, index: number) => (
                     <ConversationItem
@@ -190,7 +186,7 @@ const Home = () => {
                   )
                 )}
 
-              {selectedTab == 1 &&
+              {selectedTab === 1 &&
                 groupConversations.map((item: ConversationProps, index) => {
                   return (
                     <ConversationItem
@@ -204,13 +200,13 @@ const Home = () => {
             </View>
 
             {!loading &&
-              selectedTab == 0 &&
-              directConversations.length == 0 && (
+              selectedTab === 0 &&
+              directConversations.length === 0 && (
                 <Typo style={{ textAlign: "center" }}>
                   You don't have any direct messages yet.
                 </Typo>
               )}
-            {!loading && selectedTab == 1 && groupConversations.length == 0 && (
+            {!loading && selectedTab === 1 && groupConversations.length === 0 && (
               <Typo style={{ textAlign: "center" }}>
                 You don't have any group messages yet.
               </Typo>
