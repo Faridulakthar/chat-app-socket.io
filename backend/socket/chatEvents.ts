@@ -1,5 +1,6 @@
 import { Server as SocketIOServer, Socket } from "socket.io";
 import Conversation from "../models/Conversation";
+import Message from "../models/Message";
 
 export function registerChatEvents(io: SocketIOServer, socket: Socket) {
   socket.on("getConversations", async (data) => {
@@ -105,6 +106,46 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
     } catch (error: any) {
       console.log("newConversation error:", error);
       socket.emit("newConversation", {
+        success: false,
+        msg: error.message || "Failed to create conversation",
+      });
+    }
+  });
+
+  socket.on("newMessage", async (data) => {
+    console.log("newMessage event", data);
+
+    try {
+      const message = await Message.create({
+        conversationId: data.conversationId,
+        senderId: socket.data.userId,
+        content: data.content || "",
+        attachment: data.attachment || "",
+      });
+
+      io.to(data.conversationId).emit("newMessage", {
+        success: true,
+        data: {
+          id: message._id,
+          content: data.content,
+          sender: {
+            id: data.sender.id,
+            name: data.sender.name,
+            avatar: data.sender.avatar,
+          },
+          attachment: data.attachment,
+          createdAt: new Date().toISOString(),
+          ConversationId: data.conversationId,
+        },
+      });
+
+      //   update last message in conversation
+      await Conversation.findByIdAndUpdate(data.conversationId, {
+        lastMessage: message._id,
+      });
+    } catch (error: any) {
+      console.log("newMessage error:", error);
+      socket.emit("newMessage", {
         success: false,
         msg: error.message || "Failed to create conversation",
       });
