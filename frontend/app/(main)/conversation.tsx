@@ -7,7 +7,7 @@ import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/context/authContext";
 import { scale, verticalScale } from "@/utils/styling";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -24,6 +24,8 @@ import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
 import Loader from "@/components/Loader";
 import { uploadFileToCloudinary } from "@/services/imageService";
+import { newMessage } from "@/socket/socketEvents";
+import { ResponseProps } from "@/types";
 
 const Conversation = () => {
   const router = useRouter();
@@ -58,6 +60,18 @@ const Conversation = () => {
   }
 
   let conversationName = isDirect ? otherParticipant?.name : (name as string);
+
+  useEffect(() => {
+    newMessage(newMessageHandler);
+
+    return () => {
+      newMessage(newMessageHandler, true);
+    };
+  }, []);
+
+  const newMessageHandler = (res: ResponseProps) => {
+    console.log("new message response", res.data);
+  };
 
   const dummyMessages = [
     {
