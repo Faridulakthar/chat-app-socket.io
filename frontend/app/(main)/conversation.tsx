@@ -70,6 +70,7 @@ const Conversation = () => {
   }, []);
 
   const newMessageHandler = (res: ResponseProps) => {
+    setLoading(false);
     console.log("new message response", res.data);
   };
 
@@ -163,6 +164,20 @@ const Conversation = () => {
           return;
         }
       }
+
+      newMessage({
+        conversationId,
+        sender: {
+          id: currentUser.id,
+          name: currentUser.name,
+          avatar: currentUser.avatar,
+        },
+        content: message?.trim(),
+        attachement: attachment,
+      });
+
+      setMessage("");
+      setSelectedFile(null);
     } catch (error: any) {
       console.log("Error sending message", error);
       Alert.alert("Message", error.message || "Failed to send message");
