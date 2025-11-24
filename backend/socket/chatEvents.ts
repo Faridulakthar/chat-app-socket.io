@@ -151,4 +151,22 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
       });
     }
   });
+
+  socket.on("getMessages", async (data: { conversationId: string }) => {
+    console.log("getMessages event", data);
+
+    try {
+      const messages = await Message.find({
+        conversationId: data.conversationId,
+      })
+        .sort({ createdAt: -1 })
+        .populate({ path: "senderId", select: "name avatar" });
+    } catch (error: any) {
+      console.log("getMessages error:", error);
+      socket.emit("getMessages", {
+        success: false,
+        msg: error.message || "Failed to fetch messages",
+      });
+    }
+  });
 }
