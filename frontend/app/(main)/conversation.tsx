@@ -24,8 +24,8 @@ import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
 import Loader from "@/components/Loader";
 import { uploadFileToCloudinary } from "@/services/imageService";
-import { newMessage } from "@/socket/socketEvents";
-import { ResponseProps } from "@/types";
+import { getMessages, newMessage } from "@/socket/socketEvents";
+import { MessageProps, ResponseProps } from "@/types";
 
 const Conversation = () => {
   const router = useRouter();
@@ -45,6 +45,7 @@ const Conversation = () => {
     null
   );
   const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
 
   const participants = JSON.parse(stringifiedPariticipants as string);
 
@@ -63,9 +64,13 @@ const Conversation = () => {
 
   useEffect(() => {
     newMessage(newMessageHandler);
+    getMessages(messagesHandler);
+
+    getMessages({ conversationId });
 
     return () => {
       newMessage(newMessageHandler, true);
+      getMessages(messagesHandler, true);
     };
   }, []);
 
@@ -74,52 +79,59 @@ const Conversation = () => {
     console.log("new message response", res.data);
   };
 
-  const dummyMessages = [
-    {
-      id: "msg_10",
-      sender: {
-        id: "user_1",
-        name: "Jane Smith",
-        avatar: null,
-      },
-      content: "Hello! How are you?",
-      createdAt: "2024-10-01T10:05:00Z",
-      isMe: true,
-    },
-    {
-      id: "msg_11",
-      sender: {
-        id: "user_2",
-        name: "Jane Smith",
-        avatar: null,
-      },
-      content: "Yeah, I'm doing good too. Thanks for asking!",
-      createdAt: "2024-10-01T10:05:00Z",
-      isMe: false,
-    },
-    {
-      id: "msg_12",
-      sender: {
-        id: "user_1",
-        name: "Jane Smith",
-        avatar: null,
-      },
-      content: "What's up? Long time no see.",
-      createdAt: "2024-10-01T10:05:00Z",
-      isMe: true,
-    },
-    {
-      id: "msg_13",
-      sender: {
-        id: "user_2",
-        name: "Jane Smith",
-        avatar: null,
-      },
-      content: "Hey",
-      createdAt: "2024-10-01T10:05:00Z",
-      isMe: false,
-    },
-  ];
+  const messagesHandler = (res: ResponseProps) => {
+    console.log("get messages response", res.data);
+    if (res.success) {
+      setMessages(res.data);
+    }
+  };
+
+  // const dummyMessages = [
+  //   {
+  //     id: "msg_10",
+  //     sender: {
+  //       id: "user_1",
+  //       name: "Jane Smith",
+  //       avatar: null,
+  //     },
+  //     content: "Hello! How are you?",
+  //     createdAt: "2024-10-01T10:05:00Z",
+  //     isMe: true,
+  //   },
+  //   {
+  //     id: "msg_11",
+  //     sender: {
+  //       id: "user_2",
+  //       name: "Jane Smith",
+  //       avatar: null,
+  //     },
+  //     content: "Yeah, I'm doing good too. Thanks for asking!",
+  //     createdAt: "2024-10-01T10:05:00Z",
+  //     isMe: false,
+  //   },
+  //   {
+  //     id: "msg_12",
+  //     sender: {
+  //       id: "user_1",
+  //       name: "Jane Smith",
+  //       avatar: null,
+  //     },
+  //     content: "What's up? Long time no see.",
+  //     createdAt: "2024-10-01T10:05:00Z",
+  //     isMe: true,
+  //   },
+  //   {
+  //     id: "msg_13",
+  //     sender: {
+  //       id: "user_2",
+  //       name: "Jane Smith",
+  //       avatar: null,
+  //     },
+  //     content: "Hey",
+  //     createdAt: "2024-10-01T10:05:00Z",
+  //     isMe: false,
+  //   },
+  // ];
 
   const onPickFile = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -221,7 +233,7 @@ const Conversation = () => {
         {/* Message */}
         <View style={styles.content}>
           <FlatList
-            data={dummyMessages}
+            data={messages}
             inverted={true}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.messagesContent}
