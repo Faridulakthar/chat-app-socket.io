@@ -163,7 +163,8 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
         .populate<{ senderId: { _id: string; name: string; avatar: string } }>({
           path: "senderId",
           select: "name avatar",
-        });
+        })
+        .lean();
 
       const messageWithSender = messages.map((message) => ({
         ...message,
