@@ -160,7 +160,24 @@ export function registerChatEvents(io: SocketIOServer, socket: Socket) {
         conversationId: data.conversationId,
       })
         .sort({ createdAt: -1 })
-        .populate({ path: "senderId", select: "name avatar" });
+        .populate<{ senderId: { _id: string; name: string; avatar: string } }>({
+          path: "senderId",
+          select: "name avatar",
+        });
+
+      const messageWithSender = messages.map((message) => ({
+        ...message,
+        sender: {
+          id: message.senderId._id,
+          name: message.senderId.name,
+          avatar: message.senderId.avatar,
+        },
+      }));
+
+      socket.emit("getMessages", {
+        success: true,
+        data: messageWithSender,
+      });
     } catch (error: any) {
       console.log("getMessages error:", error);
       socket.emit("getMessages", {
