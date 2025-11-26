@@ -77,6 +77,14 @@ const Conversation = () => {
   const newMessageHandler = (res: ResponseProps) => {
     setLoading(false);
     console.log("new message response", res.data);
+
+    if (res?.success) {
+      if (res.data?.conversationId === conversationId) {
+        setMessages((prev) => [res.data as MessageProps, ...prev]);
+      }
+    } else {
+      Alert.alert("Error", res?.msg || "Failed to send message");
+    }
   };
 
   const messagesHandler = (res: ResponseProps) => {
@@ -166,7 +174,6 @@ const Conversation = () => {
 
         if (uploadResult?.success) {
           attachment = uploadResult.data;
-          console.log({ attachment });
         } else {
           Alert.alert(
             "Image Upload",
@@ -185,7 +192,7 @@ const Conversation = () => {
           avatar: currentUser.avatar,
         },
         content: message?.trim(),
-        attachement: attachment,
+        attachment: attachment,
       });
 
       setMessage("");

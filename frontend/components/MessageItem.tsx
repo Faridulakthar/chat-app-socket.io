@@ -52,9 +52,9 @@ const MessageItem = ({
           </Typo>
         )}
 
-        {item.attachement && (
+        {item.attachment && (
           <Image
-            source={item.attachement}
+            source={item.attachment}
             contentFit="cover"
             style={styles.attachment}
             transition={100}
