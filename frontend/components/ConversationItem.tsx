@@ -26,7 +26,7 @@ const ConversationItem = ({
   }
 
   const getLastMessageContent = () => {
-    if (!lastMessage) return "Say Hey 👻";
+    if (!lastMessage) return "Say Hey!";
 
     return lastMessage?.attachment ? "Image" : lastMessage.content;
   };

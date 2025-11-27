@@ -5,7 +5,11 @@ import Typo from "@/components/Typo";
 import Button from "@/components/Button";
 import { useAuth } from "@/context/authContext";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
-import { getConversations, newConversation } from "@/socket/socketEvents";
+import {
+  getConversations,
+  newConversation,
+  newMessage,
+} from "@/socket/socketEvents";
 import { verticalScale } from "@/utils/styling";
 import * as Icons from "phosphor-react-native";
 import { useRouter } from "expo-router";
@@ -24,12 +28,14 @@ const Home = () => {
   useEffect(() => {
     getConversations(processConversations);
     newConversation(newConversationHandler);
+    newMessage(newMessageHandler);
 
     getConversations(null);
 
     return () => {
       getConversations(processConversations, true);
       getConversations(newConversationHandler, true);
+      newMessage(newMessageHandler, true);
     };
   }, []);
 
@@ -44,6 +50,20 @@ const Home = () => {
   const newConversationHandler = (res: ResponseProps) => {
     if (res?.success && res?.data?.isNew) {
       setConversations((prev) => [...prev, res?.data]);
+    }
+  };
+
+  const newMessageHandler = (res: ResponseProps) => {
+    if (res.success) {
+      let conversationId = res.data.conversationId;
+
+      setConversations((prev) => {
+        let updatedConversations = prev.map((item) => {
+          if (item._id == conversationId) item.lastMessage = res.data;
+          return item;
+        });
+        return updatedConversations;
+      });
     }
   };
 
@@ -206,11 +226,13 @@ const Home = () => {
                   You don't have any direct messages yet.
                 </Typo>
               )}
-            {!loading && selectedTab === 1 && groupConversations.length === 0 && (
-              <Typo style={{ textAlign: "center" }}>
-                You don't have any group messages yet.
-              </Typo>
-            )}
+            {!loading &&
+              selectedTab === 1 &&
+              groupConversations.length === 0 && (
+                <Typo style={{ textAlign: "center" }}>
+                  You don't have any group messages yet.
+                </Typo>
+              )}
           </ScrollView>
         </View>
       </View>
